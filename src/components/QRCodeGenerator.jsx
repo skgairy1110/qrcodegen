@@ -14,11 +14,18 @@ const QRCodeGenerator = () => {
   const qrCodeRef = useRef(null);
 
   const generateQRCode = () => {
+    if (!inputValue.trim()) return;
     setIsGenerating(true);
     setTimeout(() => {
       setQRValue(inputValue);
       setIsGenerating(false);
     }, 500); // Simulate a short delay
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      generateQRCode();
+    }
   };
 
   const copyToClipboard = async () => {
@@ -64,7 +71,8 @@ const QRCodeGenerator = () => {
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Enter text or URL"
+            onKeyPress={handleKeyPress}
+            placeholder="Enter text or URL and press Enter"
             className="w-full text-lg"
           />
           <Button 
