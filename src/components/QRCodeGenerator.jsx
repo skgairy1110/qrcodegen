@@ -21,6 +21,7 @@ const QRCodeGenerator = () => {
   const [textBelow, setTextBelow] = useState('');
   const [logo, setLogo] = useState('');
   const [showLogo, setShowLogo] = useState(false);
+  const [resolution, setResolution] = useState(200);
   const qrCodeRef = useRef(null);
 
   const generateQRCode = () => {
@@ -29,7 +30,7 @@ const QRCodeGenerator = () => {
     setTimeout(() => {
       setQRValue(inputValue);
       setIsGenerating(false);
-    }, 500); // Simulate a short delay
+    }, 500);
   };
 
   const handleKeyPress = (e) => {
@@ -115,6 +116,8 @@ const QRCodeGenerator = () => {
                   setLogo={setLogo}
                   showLogo={showLogo}
                   setShowLogo={setShowLogo}
+                  resolution={resolution}
+                  setResolution={setResolution}
                 />
               </AccordionContent>
             </AccordionItem>
@@ -125,14 +128,14 @@ const QRCodeGenerator = () => {
                 <div ref={qrCodeRef} className="p-4 bg-white rounded-lg shadow-md">
                   <QRCodeSVG 
                     value={qrValue} 
-                    size={200}
+                    size={resolution}
                     level="H"
                     imageSettings={showLogo && logo ? {
                       src: logo,
                       x: undefined,
                       y: undefined,
-                      height: 40,
-                      width: 40,
+                      height: Math.round(resolution * 0.2),
+                      width: Math.round(resolution * 0.2),
                       excavate: true,
                     } : undefined}
                   />
