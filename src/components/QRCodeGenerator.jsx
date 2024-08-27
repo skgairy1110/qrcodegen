@@ -4,13 +4,23 @@ import { toPng } from 'html-to-image';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Copy, Download } from "lucide-react";
+import { Loader2, Copy, Download, Settings } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import AdvancedOptions from './AdvancedOptions';
 
 const QRCodeGenerator = () => {
   const [qrValue, setQRValue] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [textBelow, setTextBelow] = useState('');
+  const [logo, setLogo] = useState('');
+  const [showLogo, setShowLogo] = useState(false);
   const qrCodeRef = useRef(null);
 
   const generateQRCode = () => {
@@ -89,11 +99,48 @@ const QRCodeGenerator = () => {
               'Generate QR Code'
             )}
           </Button>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="advanced-options">
+              <AccordionTrigger>
+                <div className="flex items-center">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Advanced Options
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <AdvancedOptions
+                  text={textBelow}
+                  setText={setTextBelow}
+                  logo={logo}
+                  setLogo={setLogo}
+                  showLogo={showLogo}
+                  setShowLogo={setShowLogo}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
           {qrValue && (
             <div className="mt-6 space-y-4">
               <div className="flex justify-center">
                 <div ref={qrCodeRef} className="p-4 bg-white rounded-lg shadow-md">
-                  <QRCodeSVG value={qrValue} size={200} />
+                  <QRCodeSVG 
+                    value={qrValue} 
+                    size={200}
+                    level="H"
+                    imageSettings={showLogo && logo ? {
+                      src: logo,
+                      x: undefined,
+                      y: undefined,
+                      height: 40,
+                      width: 40,
+                      excavate: true,
+                    } : undefined}
+                  />
+                  {textBelow && (
+                    <div className="text-center mt-2 text-sm font-semibold">
+                      {textBelow}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex justify-center space-x-4">
