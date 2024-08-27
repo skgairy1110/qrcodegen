@@ -2,8 +2,9 @@ import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 
-const AdvancedOptions = ({ text, setText, logo, setLogo, showLogo, setShowLogo }) => {
+const AdvancedOptions = ({ text, setText, logo, setLogo, showLogo, setShowLogo, resolution, setResolution }) => {
   return (
     <div className="space-y-4">
       <div>
@@ -31,6 +32,20 @@ const AdvancedOptions = ({ text, setText, logo, setLogo, showLogo, setShowLogo }
           onCheckedChange={setShowLogo}
         />
         <Label htmlFor="show-logo">Show Logo in QR Code</Label>
+      </div>
+      <div>
+        <Label htmlFor="resolution">QR Code Resolution</Label>
+        <div className="flex items-center space-x-2">
+          <Slider
+            id="resolution"
+            min={100}
+            max={1000}
+            step={10}
+            value={[resolution]}
+            onValueChange={(value) => setResolution(value[0])}
+          />
+          <span>{resolution}x{resolution}</span>
+        </div>
       </div>
     </div>
   );
