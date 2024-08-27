@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { toPng } from 'html-to-image';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,66 +39,63 @@ const QRCodeGenerator = () => {
     }
   };
 
-  const copyToClipboard = async () => {
-    if (qrCodeRef.current) {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = resolution;
-        canvas.height = resolution;
-        const ctx = canvas.getContext('2d');
-        const svgString = new XMLSerializer().serializeToString(qrCodeRef.current.querySelector('svg'));
-        const img = new Image();
-        img.onload = async () => {
-          ctx.drawImage(img, 0, 0, resolution, resolution);
-          if (textBelow) {
-            ctx.font = `${resolution * 0.05}px Arial`;
-            ctx.fillStyle = 'black';
-            ctx.textAlign = 'center';
-            ctx.fillText(textBelow, resolution / 2, resolution * 0.98);
-          }
-          const dataUrl = canvas.toDataURL('image/png');
-          const blob = await fetch(dataUrl).then(res => res.blob());
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob })
-          ]);
-          toast.success("QR Code copied to clipboard!");
-        };
-        img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to copy QR Code");
+  const generateQRCodeImage = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = resolution;
+    canvas.height = resolution;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw QR Code
+    const qrSize = resolution * 0.9; // 90% of the resolution
+    const qrPosition = (resolution - qrSize) / 2;
+    const svgString = new XMLSerializer().serializeToString(qrCodeRef.current.querySelector('svg'));
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, qrPosition, qrPosition, qrSize, qrSize);
+      
+      // Draw text below
+      if (textBelow) {
+        ctx.font = `bold ${resolution * 0.05}px Arial`;
+        ctx.fillStyle = 'black';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(textBelow, resolution / 2, resolution * 0.98);
       }
+      
+      return canvas.toDataURL('image/png');
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
+    
+    return new Promise((resolve) => {
+      img.onload = () => resolve(canvas.toDataURL('image/png'));
+    });
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      const dataUrl = await generateQRCodeImage();
+      const blob = await fetch(dataUrl).then(res => res.blob());
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      toast.success("QR Code copied to clipboard!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to copy QR Code");
     }
   };
 
   const saveAsPNG = async () => {
-    if (qrCodeRef.current) {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = resolution;
-        canvas.height = resolution;
-        const ctx = canvas.getContext('2d');
-        const svgString = new XMLSerializer().serializeToString(qrCodeRef.current.querySelector('svg'));
-        const img = new Image();
-        img.onload = () => {
-          ctx.drawImage(img, 0, 0, resolution, resolution);
-          if (textBelow) {
-            ctx.font = `${resolution * 0.05}px Arial`;
-            ctx.fillStyle = 'black';
-            ctx.textAlign = 'center';
-            ctx.fillText(textBelow, resolution / 2, resolution * 0.98);
-          }
-          const link = document.createElement('a');
-          link.download = 'qr-code.png';
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-          toast.success("QR Code saved as PNG!");
-        };
-        img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to save QR Code");
-      }
+    try {
+      const dataUrl = await generateQRCodeImage();
+      const link = document.createElement('a');
+      link.download = 'qr-code.png';
+      link.href = dataUrl;
+      link.click();
+      toast.success("QR Code saved as PNG!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save QR Code");
     }
   };
 
@@ -156,7 +152,7 @@ const QRCodeGenerator = () => {
         {qrValue && (
           <div className="space-y-4">
             <div className="flex justify-center">
-              <div ref={qrCodeRef} className="p-4 bg-white rounded-lg shadow-md" style={{ width: `${previewSize}px`, height: `${previewSize}px` }}>
+              <div ref={qrCodeRef} className="p-4 bg-white rounded-lg shadow-md flex flex-col items-center" style={{ width: `${previewSize}px`, minHeight: `${previewSize}px` }}>
                 <QRCodeSVG 
                   value={qrValue} 
                   size={previewSize - 32} // Subtract padding
