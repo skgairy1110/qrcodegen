@@ -21,8 +21,9 @@ const QRCodeGenerator = () => {
   const [textBelow, setTextBelow] = useState('');
   const [logo, setLogo] = useState('');
   const [showLogo, setShowLogo] = useState(false);
-  const [resolution, setResolution] = useState(200);
+  const [resolution, setResolution] = useState(1000);
   const qrCodeRef = useRef(null);
+  const previewSize = 200; // Fixed size for preview
 
   const generateQRCode = () => {
     if (!inputValue.trim()) return;
@@ -42,12 +43,28 @@ const QRCodeGenerator = () => {
   const copyToClipboard = async () => {
     if (qrCodeRef.current) {
       try {
-        const dataUrl = await toPng(qrCodeRef.current);
-        const blob = await fetch(dataUrl).then(res => res.blob());
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ]);
-        toast.success("QR Code copied to clipboard!");
+        const canvas = document.createElement('canvas');
+        canvas.width = resolution;
+        canvas.height = resolution;
+        const ctx = canvas.getContext('2d');
+        const svgString = new XMLSerializer().serializeToString(qrCodeRef.current.querySelector('svg'));
+        const img = new Image();
+        img.onload = async () => {
+          ctx.drawImage(img, 0, 0, resolution, resolution);
+          if (textBelow) {
+            ctx.font = `${resolution * 0.05}px Arial`;
+            ctx.fillStyle = 'black';
+            ctx.textAlign = 'center';
+            ctx.fillText(textBelow, resolution / 2, resolution * 0.98);
+          }
+          const dataUrl = canvas.toDataURL('image/png');
+          const blob = await fetch(dataUrl).then(res => res.blob());
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+          toast.success("QR Code copied to clipboard!");
+        };
+        img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
       } catch (err) {
         console.error(err);
         toast.error("Failed to copy QR Code");
@@ -58,12 +75,27 @@ const QRCodeGenerator = () => {
   const saveAsPNG = async () => {
     if (qrCodeRef.current) {
       try {
-        const dataUrl = await toPng(qrCodeRef.current);
-        const link = document.createElement('a');
-        link.download = 'qr-code.png';
-        link.href = dataUrl;
-        link.click();
-        toast.success("QR Code saved as PNG!");
+        const canvas = document.createElement('canvas');
+        canvas.width = resolution;
+        canvas.height = resolution;
+        const ctx = canvas.getContext('2d');
+        const svgString = new XMLSerializer().serializeToString(qrCodeRef.current.querySelector('svg'));
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, resolution, resolution);
+          if (textBelow) {
+            ctx.font = `${resolution * 0.05}px Arial`;
+            ctx.fillStyle = 'black';
+            ctx.textAlign = 'center';
+            ctx.fillText(textBelow, resolution / 2, resolution * 0.98);
+          }
+          const link = document.createElement('a');
+          link.download = 'qr-code.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          toast.success("QR Code saved as PNG!");
+        };
+        img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
       } catch (err) {
         console.error(err);
         toast.error("Failed to save QR Code");
@@ -125,17 +157,17 @@ const QRCodeGenerator = () => {
           {qrValue && (
             <div className="mt-6 space-y-4">
               <div className="flex justify-center">
-                <div ref={qrCodeRef} className="p-4 bg-white rounded-lg shadow-md">
+                <div ref={qrCodeRef} className="p-4 bg-white rounded-lg shadow-md" style={{ width: `${previewSize}px`, height: `${previewSize}px` }}>
                   <QRCodeSVG 
                     value={qrValue} 
-                    size={resolution}
+                    size={previewSize}
                     level="H"
                     imageSettings={showLogo && logo ? {
                       src: logo,
                       x: undefined,
                       y: undefined,
-                      height: Math.round(resolution * 0.2),
-                      width: Math.round(resolution * 0.2),
+                      height: Math.round(previewSize * 0.2),
+                      width: Math.round(previewSize * 0.2),
                       excavate: true,
                     } : undefined}
                   />
