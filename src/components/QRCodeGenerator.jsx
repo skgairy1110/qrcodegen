@@ -105,92 +105,90 @@ const QRCodeGenerator = () => {
 
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500">
-        <CardTitle className="text-2xl font-bold text-white">QR Code Alchemist</CardTitle>
+      <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 py-4">
+        <CardTitle className="text-2xl font-bold text-white text-center">QR Code Alchemist</CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-6">
-          <Input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Enter text or URL and press Enter"
-            className="w-full text-lg"
-          />
-          <Button 
-            onClick={generateQRCode} 
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105"
-            disabled={isGenerating || !inputValue.trim()}
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              'Generate QR Code'
-            )}
-          </Button>
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="advanced-options">
-              <AccordionTrigger>
-                <div className="flex items-center">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Advanced Options
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <AdvancedOptions
-                  text={textBelow}
-                  setText={setTextBelow}
-                  logo={logo}
-                  setLogo={setLogo}
-                  showLogo={showLogo}
-                  setShowLogo={setShowLogo}
-                  resolution={resolution}
-                  setResolution={setResolution}
-                />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-          {qrValue && (
-            <div className="mt-6 space-y-4">
-              <div className="flex justify-center">
-                <div ref={qrCodeRef} className="p-4 bg-white rounded-lg shadow-md" style={{ width: `${previewSize}px`, height: `${previewSize}px` }}>
-                  <QRCodeSVG 
-                    value={qrValue} 
-                    size={previewSize}
-                    level="H"
-                    imageSettings={showLogo && logo ? {
-                      src: logo,
-                      x: undefined,
-                      y: undefined,
-                      height: Math.round(previewSize * 0.2),
-                      width: Math.round(previewSize * 0.2),
-                      excavate: true,
-                    } : undefined}
-                  />
-                  {textBelow && (
-                    <div className="text-center mt-2 text-sm font-semibold">
-                      {textBelow}
-                    </div>
-                  )}
-                </div>
+      <CardContent className="p-6 space-y-6">
+        <Input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Enter text or URL and press Enter"
+          className="w-full text-lg"
+        />
+        <Button 
+          onClick={generateQRCode} 
+          className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105"
+          disabled={isGenerating || !inputValue.trim()}
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            'Generate QR Code'
+          )}
+        </Button>
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="advanced-options">
+            <AccordionTrigger className="py-2">
+              <div className="flex items-center">
+                <Settings className="w-4 h-4 mr-2" />
+                Advanced Options
               </div>
-              <div className="flex justify-center space-x-4">
-                <Button onClick={copyToClipboard} className="flex items-center">
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy
-                </Button>
-                <Button onClick={saveAsPNG} className="flex items-center">
-                  <Download className="mr-2 h-4 w-4" />
-                  Save
-                </Button>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-4">
+              <AdvancedOptions
+                text={textBelow}
+                setText={setTextBelow}
+                logo={logo}
+                setLogo={setLogo}
+                showLogo={showLogo}
+                setShowLogo={setShowLogo}
+                resolution={resolution}
+                setResolution={setResolution}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        {qrValue && (
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <div ref={qrCodeRef} className="p-4 bg-white rounded-lg shadow-md" style={{ width: `${previewSize}px`, height: `${previewSize}px` }}>
+                <QRCodeSVG 
+                  value={qrValue} 
+                  size={previewSize - 32} // Subtract padding
+                  level="H"
+                  imageSettings={showLogo && logo ? {
+                    src: logo,
+                    x: undefined,
+                    y: undefined,
+                    height: Math.round((previewSize - 32) * 0.2),
+                    width: Math.round((previewSize - 32) * 0.2),
+                    excavate: true,
+                  } : undefined}
+                />
+                {textBelow && (
+                  <div className="text-center mt-2 text-sm font-semibold">
+                    {textBelow}
+                  </div>
+                )}
               </div>
             </div>
-          )}
-        </div>
+            <div className="flex justify-center space-x-4">
+              <Button onClick={copyToClipboard} className="flex items-center">
+                <Copy className="mr-2 h-4 w-4" />
+                Copy
+              </Button>
+              <Button onClick={saveAsPNG} className="flex items-center">
+                <Download className="mr-2 h-4 w-4" />
+                Save
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
