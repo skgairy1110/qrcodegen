@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -39,37 +39,35 @@ const QRCodeGenerator = () => {
     }
   };
 
-  const generateQRCodeImage = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = resolution;
-    canvas.height = resolution;
-    const ctx = canvas.getContext('2d');
-    
-    // Draw QR Code
-    const qrSize = resolution * 0.9; // 90% of the resolution
-    const qrPosition = (resolution - qrSize) / 2;
-    const svgString = new XMLSerializer().serializeToString(qrCodeRef.current.querySelector('svg'));
-    const img = new Image();
-    img.onload = () => {
-      ctx.drawImage(img, qrPosition, qrPosition, qrSize, qrSize);
-      
-      // Draw text below
-      if (textBelow) {
-        ctx.font = `bold ${resolution * 0.05}px Arial`;
-        ctx.fillStyle = 'black';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(textBelow, resolution / 2, resolution * 0.98);
-      }
-      
-      return canvas.toDataURL('image/png');
-    };
-    img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
-    
+  const generateQRCodeImage = useCallback(() => {
     return new Promise((resolve) => {
-      img.onload = () => resolve(canvas.toDataURL('image/png'));
+      const canvas = document.createElement('canvas');
+      canvas.width = resolution;
+      canvas.height = resolution;
+      const ctx = canvas.getContext('2d');
+      
+      // Draw QR Code
+      const qrSize = resolution * 0.9; // 90% of the resolution
+      const qrPosition = (resolution - qrSize) / 2;
+      const svgString = new XMLSerializer().serializeToString(qrCodeRef.current.querySelector('svg'));
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, qrPosition, qrPosition, qrSize, qrSize);
+        
+        // Draw text below
+        if (textBelow) {
+          ctx.font = `bold ${resolution * 0.05}px Arial`;
+          ctx.fillStyle = 'black';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(textBelow, resolution / 2, resolution * 0.98);
+        }
+        
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
     });
-  };
+  }, [resolution, textBelow]);
 
   const copyToClipboard = async () => {
     try {
