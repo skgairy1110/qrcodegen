@@ -47,7 +47,7 @@ const QRCodeGenerator = () => {
       const ctx = canvas.getContext('2d');
       
       // Draw QR Code
-      const qrSize = resolution * 0.9; // 90% of the resolution
+      const qrSize = resolution * 0.8; // 80% of the resolution
       const qrPosition = (resolution - qrSize) / 2;
       const svgString = new XMLSerializer().serializeToString(qrCodeRef.current.querySelector('svg'));
       const img = new Image();
@@ -56,11 +56,13 @@ const QRCodeGenerator = () => {
         
         // Draw text below
         if (textBelow) {
-          ctx.font = `bold ${resolution * 0.05}px Arial`;
+          const fontSize = resolution * 0.05;
+          ctx.font = `bold ${fontSize}px Arial`;
           ctx.fillStyle = 'black';
           ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(textBelow, resolution / 2, resolution * 0.98);
+          ctx.textBaseline = 'top';
+          const textY = qrPosition + qrSize + (resolution * 0.05); // 5% padding below QR code
+          ctx.fillText(textBelow, resolution / 2, textY);
         }
         
         resolve(canvas.toDataURL('image/png'));
@@ -153,19 +155,19 @@ const QRCodeGenerator = () => {
               <div ref={qrCodeRef} className="p-4 bg-white rounded-lg shadow-md flex flex-col items-center" style={{ width: `${previewSize}px`, minHeight: `${previewSize}px` }}>
                 <QRCodeSVG 
                   value={qrValue} 
-                  size={previewSize - 32} // Subtract padding
+                  size={Math.round(previewSize * 0.8)} // 80% of preview size
                   level="H"
                   imageSettings={showLogo && logo ? {
                     src: logo,
                     x: undefined,
                     y: undefined,
-                    height: Math.round((previewSize - 32) * 0.2),
-                    width: Math.round((previewSize - 32) * 0.2),
+                    height: Math.round(previewSize * 0.16), // 20% of QR code size
+                    width: Math.round(previewSize * 0.16),
                     excavate: true,
                   } : undefined}
                 />
                 {textBelow && (
-                  <div className="text-center mt-2 text-sm font-semibold">
+                  <div className="text-center mt-4 text-sm font-semibold">
                     {textBelow}
                   </div>
                 )}
