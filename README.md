@@ -2,4 +2,4 @@
 
 Made with [GPT Engineer](https://gptengineer.app)
 
-Deployed at https://qr-code-alchemist.gptengineer.run/
+Deployed at https://qr-code-plus.lovable.dev
